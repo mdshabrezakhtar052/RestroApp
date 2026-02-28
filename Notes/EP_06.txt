@@ -1,0 +1,394 @@
+Learning in EP-06
+
+We will go:
+1️⃣ Big Picture Architecture
+2️⃣ App.js (Root & Rendering Concept)
+3️⃣ Body.js (State, useEffect, API, Filtering, Re-rendering)
+4️⃣ Header.js (State vs Normal Variable)
+5️⃣ Shimmer.js (Skeleton Loading Concept)
+6️⃣ How Everything Connects (Flow Diagram in Mind)
+
+🔷 1️⃣ BIG PICTURE FIRST (Understand Architecture)
+
+Your app follows this flow:
+
+index.html
+   ↓
+ReactDOM.createRoot()
+   ↓
+<AppLayout />
+   ↓
+Header + Body
+   ↓
+RestroCard (Multiple)
+
+This is called:
+👉 Component-Based Architecture
+👉 Unidirectional Data Flow
+👉 Virtual DOM Rendering
+
+Now let’s go line by line.
+
+🔷 2️⃣ App.js (The Entry of Your React App)
+
+import React from "react";
+
+🔹 Concept: React Library
+This imports the React core library.
+
+React allows:
+Creating components
+Using JSX
+Using hooks
+Without React, JSX won’t work.
+
+import ReactDOM from "react-dom/client";
+
+🔹 Concept: ReactDOM
+ReactDOM connects React to the real DOM (browser DOM).
+
+React = Brain
+ReactDOM = Hands that update browser
+
+import Header from "./component/Header";
+import Body from "./component/Body";
+
+🔹 Concept: Component Import
+You are importing two components.
+
+This is called:
+👉 Modular Architecture
+👉 Reusable Component System
+
+Each file = One Responsibility (Industry Standard)
+
+🔹 Main App Component
+const AppLayout  = () => {
+🔹 Concept: Functional Component
+
+A React component is just a JavaScript function that returns JSX.
+Modern React uses functional components (NOT class components).
+
+return (
+    <div className = "app">
+        <Header />
+        <Body />
+    </div>
+);
+
+🔹 Concept: JSX
+JSX looks like HTML but it's JavaScript.
+
+Important:
+<Header /> → 
+This means:
+Call Header function and render its returned JSX.
+
+Same for <Body />.
+
+So:
+AppLayout
+↓
+Header + Body
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+🔹 Concept: Root Creation (React 18 Feature)
+This connects React to:
+<div id="root"></div>
+inside index.html.
+
+React will control everything inside this div.
+root.render(<AppLayout/>);
+
+🔹 Concept: Rendering
+
+This tells React:
+👉 Render AppLayout inside root div.
+From here React takes over the DOM.
+
+🔷 3️⃣ Body.js (Most Important File — Core Concepts)
+This file contains:
+State
+useEffect
+API call
+Filtering
+Conditional Rendering
+List Rendering
+Re-render Cycle
+
+Let’s break it.
+
+import { useEffect, useState } from "react";
+🔹 useState
+Used to create state variables.
+
+State = Superpower variable
+When state changes → Component re-renders
+
+🔹 useEffect
+Used for:
+Side effects
+API calls
+Subscriptions
+Timers
+Runs after component renders.
+
+🔹 State Variables
+const [listOfRestro, setListOfRestro] = useState([]);
+Concept: State
+Initial value = empty array.
+
+Why?
+Because data will come from API.
+When you call:
+setListOfRestro(newData)
+
+React:
+Updates state
+Re-renders component
+Updates Virtual DOM
+Updates Real DOM
+
+const [filteredRestro, setFilteredRestro] = useState([]);
+This is separate state.
+
+Why?
+Because:
+listOfRestro = original data
+filteredRestro = modified data (search/filter result)
+
+Industry rule:
+👉 Never directly mutate original data
+const [searchText, setSearchText] = useState("");
+
+This stores input box value.
+This is called:
+👉 Controlled Component
+Input value is controlled by React state.
+
+🔹 Re-render Concept
+console.log("Body Rendered");
+
+Every time state changes:
+Body function runs again.
+
+This is called:
+👉 Reconciliation Cycle
+
+React compares old Virtual DOM with new Virtual DOM.
+
+🔹 useEffect
+useEffect(() => {
+    fetchData();
+}, []);
+
+🔹 Concept: Dependency Array
+Empty array = run only once.
+Meaning:
+Run after first render only.
+
+This is similar to:
+componentDidMount (class component)
+
+🔹 fetchData Function
+const fetchData = async() => {
+Async function because API call takes time.
+const data = await fetch("https://namastedev.com/api/v1/listRestaurants");
+fetch → returns Promise
+await → waits for result
+const json = await data.json();
+Convert response into JSON format.
+
+🔹 Optional Chaining
+const restaurantData = json?.data?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+Concept: Optional Chaining (?.)
+Prevents crash if any property is undefined.
+
+Without it:
+App may break.
+This is safe coding practice.
+setListOfRestro(restaurantData || []);
+setFilteredRestro(restaurantData || []);
+If API fails → empty array.
+Smart defensive coding.
+
+🔷 Search Logic
+value={searchText}
+onChange={(e) => {
+    setSearchText(e.target.value);
+}}
+Concept: Controlled Input
+Input value = React state
+When typing:
+setSearchText runs
+State updates
+Component re-renders
+
+const filteredRestro = listOfRestro.filter(...)
+Concept: Pure JS Filtering
+filter() returns new array.
+You never modify original state.
+
+🔷 Top Rated Button
+const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4);
+setListOfRestro(filteredRestro);
+This permanently updates listOfRestro.
+
+Better approach in industry:
+Update filteredRestro instead of original.
+But logic is correct.
+
+🔷 Conditional Rendering
+listOfRestro.length === 0 ? (
+    <Shimmer />
+) : (
+Concept: Ternary Rendering
+If no data:
+Show loading UI.
+
+If data exists:
+Show restaurant cards.
+
+This is:
+👉 Conditional Rendering
+🔷 List Rendering
+filteredRestro.map((restaurant) => (
+    <RestroCard key={restaurant?.info?.id} resData={restaurant} />
+))
+
+Concepts Here:
+1️⃣ map()
+Loop through array.
+
+2️⃣ key
+Very important.
+
+React uses key to:
+Identify which element changed
+Optimize re-render
+
+Without key:
+Performance issues.
+
+3️⃣ Props
+resData={restaurant}
+Passing data from Parent → Child.
+Data Flow:
+App → Body → RestroCard
+
+React follows:
+👉 Unidirectional Data Flow
+
+🔷 4️⃣ Header.js
+let btnName = "login";
+Normal JS variable.
+
+If changed:
+UI will NOT update.
+
+Why?
+Because React does not track normal variables.
+const [btnNameReact, setbtnNameReact] = useState("Login");
+This is state variable.
+
+If changed:
+React re-renders.
+
+btnNameReact === "Login" 
+? setbtnNameReact("Logout") 
+: setbtnNameReact("Login");
+Concept: State Toggle
+
+This is called:
+👉 Conditional State Update
+When clicked:
+State changes
+Header re-renders
+Button text updates
+
+🔷 5️⃣ Shimmer.js
+Array(9).fill("").map((_, index) => (...)
+Concept: Generating Dummy UI
+Creates 9 shimmer cards.
+This is:
+👉 Skeleton Loading UI
+Used in real apps like:
+Swiggy
+Amazon
+Flipkart
+
+🔷 Real App Example of Shimmer
+4
+This improves:
+UX
+Perceived speed
+Professional look
+
+🔷 6️⃣ COMPLETE FLOW (VERY IMPORTANT)
+
+Let’s simulate:
+
+Step 1
+App loads
+AppLayout renders
+Body renders
+
+Step 2
+useEffect runs
+fetchData runs
+
+Step 3
+API data arrives
+setListOfRestro() runs
+
+Step 4
+State updated
+Body re-renders
+
+Step 5
+Shimmer disappears
+Restaurant cards appear
+
+🔷 CORE CONCEPTS YOU USED (Industry Level)
+✅ Functional Components
+✅ JSX
+✅ Props
+✅ useState
+✅ useEffect
+✅ API Fetching
+✅ Optional Chaining
+✅ Controlled Components
+✅ Conditional Rendering
+✅ List Rendering
+✅ Keys
+✅ Unidirectional Data Flow
+✅ Reconciliation
+
+🔥 Important Mental Model
+
+React = UI as a function of State
+
+UI = f(state)
+
+When state changes → UI updates automatically.
+
+You are not just writing React now.
+
+You are thinking like:
+
+✔ Component architect
+✔ State manager
+✔ Data flow engineer
+
+
+EP - 06:
+1. HOW WE CAN FETCH DATA DYNAMICALLY FROM API AND POPULATE DATA
+
+2. Two approaches to fetch and render the data :
+1. Load and Render:
+We can make the API call as soon as the app loads, fetch the data, and render it.
+Process : Loads -> API Calls -> Render
+2. Render First Fetch Later:
+Process : Loads -> Render(With Just Skelton) -> API Calls -> Re-Render
+
