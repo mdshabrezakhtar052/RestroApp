@@ -1,5 +1,16 @@
 Learning in EP-06
 
+EP - 06:
+1. HOW WE CAN FETCH DATA DYNAMICALLY FROM API AND POPULATE DATA
+
+2. Two approaches to fetch and render the data :
+1. Load and Render:
+We can make the API call as soon as the app loads, fetch the data, and render it.
+Process : Loads -> API Calls -> Render
+2. Render First Fetch Later:
+Process : Loads -> Render(With Just Skelton) -> API Calls -> Re-Render
+
+COMPLETE UNDERSTANDING FOR EP - 06:
 We will go:
 1️⃣ Big Picture Architecture
 2️⃣ App.js (Root & Rendering Concept)
@@ -381,14 +392,161 @@ You are thinking like:
 ✔ State manager
 ✔ Data flow engineer
 
+------- ORIGINAL CODE CHANGES IN EP - 06 -------
+BODY.JS :
 
-EP - 06:
-1. HOW WE CAN FETCH DATA DYNAMICALLY FROM API AND POPULATE DATA
+import RestroCard from "./RestroCard";
+// import restroList from "../Utils/mockData";
+import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
 
-2. Two approaches to fetch and render the data :
-1. Load and Render:
-We can make the API call as soon as the app loads, fetch the data, and render it.
-Process : Loads -> API Calls -> Render
-2. Render First Fetch Later:
-Process : Loads -> Render(With Just Skelton) -> API Calls -> Re-Render
+const Body = () => {
+
+    // Local State Variable - super powerful variable
+    //    const [listOfRestro, setListOfRestro] = useState(restroList);
+    
+       const [listOfRestro, setListOfRestro] = useState([]);
+       const [filteredRestro, setFilteredRestro] = useState([]);
+
+       const [searchText, setSearchText] = useState("");
+
+       // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
+       console.log("Body Rendered");
+       useEffect(() => {
+        fetchData();
+       },[]);
+
+       const fetchData = async() => {
+        
+        // Namaste React API
+        const data = await fetch("https://corsproxy.io/?url=https://namastedev.com/api/v1/listRestaurants");
+
+        //Swiggy Live API
+        // const data = await fetch("https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.2291528&lng=85.51101039999999&carousel=true&third_party_vendor=1");
+        const json = await data.json();
+
+        console.log(json);
+
+        // Namaste React API Use Optional chaining to handling the data 
+        const restaurantData = json?.data?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // Swiggy API optional chaining to handling the data
+        // const restaurantData = json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // It will get data from live API not from mock data
+        // Way 1: Actual live swiggy api
+        // setListOfRestro(json.data.cards[1].card.card.gridElements.infoWithStyle.restaurants);
+        // Way 2: Use Namaste React Live api
+        setListOfRestro(restaurantData || []);
+        setFilteredRestro(restaurantData || []);
+    }
+
+    // Normal JS Variable 
+    // let listOfRestro = [];
+
+    // Loading when API is loaded
+    // if(listOfRestro.length === 0) {
+    //     return <Shimmer />;
+    // }
+    return (
+        <div className="body">
+            <div className="Interract">
+            <div className="search">
+                <input type="text" className="search-box"
+                value={searchText} onChange={(e) => {
+                    setSearchText(e.target.value);
+                }}></input>
+                <button className="search-btn"
+                onClick={() => {
+                    // Filter the restro cards and update the UI
+                    // searchText
+                    console.log(searchText);
+                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+                    setFilteredRestro(filteredRestro);
+                }}>Search</button>
+            </div>
+            <div className="filter">
+                <button className="filter-btn" onClick={() => {
+                    const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
+                    setFilteredRestro(filteredRestro);
+                    console.log(filteredRestro);
+                }}>Top Rated</button>
+            </div>
+            </div>
+            {/* Conditional Rendering */}
+            {
+                listOfRestro.length === 0 ? (
+                    <Shimmer />
+                ) : (
+                    <div className="res-container">
+                    {
+                        filteredRestro.map((restaurant) => (
+                            <RestroCard key = {restaurant?.info?.id} resData = {restaurant} />
+                        ))
+                    }
+                </div>
+                )
+            }
+
+        </div>
+    );
+};
+
+export default Body;
+
+Header.js :
+
+import { LOGO_URL } from "../Utils/constants";
+import { useState } from "react";
+// Header Component
+const Header = () => {
+
+    let btnName = "login";
+
+    const [btnNameReact, setbtnNameReact] = useState("Login");
+    return (
+        <div className="header">
+            <div className="logo-container">
+                <img className="logo" src={LOGO_URL} />
+            </div>
+            <div className="nav-items">
+                <ul>
+                    <li>Home</li>
+                    <li>About</li>
+                    <li>Contact</li>
+                    <li>Company</li>
+                    <li>Career</li>
+                    <button className="login" onClick={() => {
+                        btnNameReact === "Login" ? setbtnNameReact("Logout") : setbtnNameReact("Login"); 
+                        // console.log(setbtnNameReact);
+                    }}>{btnNameReact}</button>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default Header;
+
+Added Shimmer.js:
+
+const Shimmer = () => {
+    return (
+        <div className="shimmer-container">
+            {
+                Array(9).fill("").map((_, index) => (
+                    <div key={index} className="shimmer-card">
+                        <div className="shimmer-img"></div>
+                           <div className="shimmer-content">
+                              <div className="shimmer-line title"></div>
+                              <div className="shimmer-line title"></div>
+                              <div className="shimmer-line title"></div>
+                           </div>
+                        </div>
+                ))}
+        </div>
+    );
+};
+
+export default Shimmer;
 
