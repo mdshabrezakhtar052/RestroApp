@@ -1,0 +1,649 @@
+Two type of routing in web apps:
+1 - Client side routing
+2 - Server side routing
+
+---- Understanding ----
+We will understand:
+What happens when app starts
+How routing works
+How Header works
+How Body fetches data
+How clicking restaurant works
+How everything connects
+
+🧠 STEP 1: When Your App Starts
+
+Inside index.html you have:
+<div id="root"></div>
+
+In App.js:
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<RouterProvider router={appRouter} />);
+
+👉 This means:
+React takes control of <div id="root">
+And instead of rendering <AppLayout /> directly,
+you render <RouterProvider />.
+
+So now:
+Router controls your whole app.
+
+🧭 STEP 2: Understanding Routing (Very Important)
+You created:
+const appRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <AppLayout />,
+    children: [...]
+  }
+]);
+
+This means:
+When URL starts with /,
+render AppLayout.
+
+What is AppLayout?
+const AppLayout = () => {
+  return (
+    <div>
+      <Header />
+      <Outlet />
+    </div>
+  );
+};
+
+Important:
+<Header /> always shows
+<Outlet /> changes depending on URL
+
+Think like this:
+Header = permanent
+Outlet = changeable area
+
+🏠 Example 1: When URL = "/"
+Router checks:
+{
+  path: "/",
+  element: <Body />
+}
+
+So inside Outlet, it renders:
+Body component
+
+Final screen:
+Header
+Body
+
+📄 Example 2: When URL = "/about"
+Router checks:
+{
+  path: "/about",
+  element: <About />
+}
+
+Now inside Outlet:
+About component
+Final screen:
+Header
+About
+
+Header never changes.
+Only Outlet changes.
+That is why Outlet is powerful.
+
+🔗 STEP 3: How Navigation Works (Link)
+In Header:
+<Link to="/about">About</Link>
+When you click:
+React does NOT reload page ❌
+It just changes component inside Outlet ✅
+This is called:
+Single Page Application (SPA)
+
+🔘 STEP 4: Login Button Logic
+const [btnNameReact, setbtnNameReact] = useState("Login");
+
+When you click button:
+btnNameReact === "Login"
+  ? setbtnNameReact("Logout")
+  : setbtnNameReact("Login");
+
+What happens?
+State changes
+Header re-renders
+Button text updates
+
+Important:
+If you used normal variable:
+let btnName = "Login";
+
+UI would NOT update.
+Because React only tracks state.
+
+🍽 STEP 5: Body Component (Most Important)
+
+When Body loads:
+useEffect(() => {
+  fetchData();
+}, []);
+
+Empty array means:
+Run only once.
+
+Now what happens?
+
+Step 1
+Body renders first time.
+listOfRestro = []
+So:
+listOfRestro.length === 0
+TRUE
+So Shimmer shows.
+
+Step 2
+fetchData runs:
+const data = await fetch(...);
+const json = await data.json();
+fetch → gets response
+json() → converts to JavaScript object
+
+Step 3
+You extract restaurants:
+const restaurantData = json?.data?...?.restaurants;
+Optional chaining prevents crash.
+
+Step 4
+You update state:
+setListOfRestro(restaurantData);
+setFilteredRestro(restaurantData);
+Now React re-renders Body.
+
+Step 5
+Now listOfRestro is NOT empty.
+So this runs:
+filteredRestro.map(...)
+Restaurant cards appear.
+Shimmer disappears.
+
+🔍 STEP 6: Search Logic
+When typing:
+value={searchText}
+onChange={(e) => setSearchText(e.target.value)}
+Input is controlled by React state.
+
+When clicking Search:
+listOfRestro.filter(...)
+You filter original data.
+Then:
+setFilteredRestro(filteredRestro);
+UI updates automatically.
+
+⭐ STEP 7: Top Rated Button
+listOfRestro.filter((res) => res.info.avgRating > 4.2)
+You filter high rating restaurants.
+Then update:
+setFilteredRestro(filteredRestro);
+UI updates.
+
+🧾 STEP 8: Restaurant Card Click
+In Body:
+<Link to={"/restaurants/" + restaurant.info.id}>
+Example:
+If id = 123
+URL becomes:
+/restaurants/123
+Router sees:
+path: "/restaurants/:resid"
+It matches.
+Now Outlet renders:
+RestroMenu component.
+This is dynamic routing.
+:resid is variable.
+
+❗ STEP 9: Error Page
+If you type wrong URL:
+/random
+Router cannot match.
+So it shows:
+errorElement: <Error />
+Inside Error:
+const err = useRouteError();
+It displays error details.
+
+🖼 STEP 10: RestroCard
+Body sends data:
+<RestroCard resData={restaurant} />
+Inside RestroCard:
+const {resData} = props;
+Then:
+const {name, avgRating} = resData.info;
+It displays restaurant info.
+This is props system.
+Parent → Child data flow.
+
+🔥 COMPLETE FLOW IN SIMPLE WORDS
+
+App starts
+↓
+Router loads
+↓
+AppLayout renders
+↓
+Header always shows
+↓
+Outlet loads Body
+↓
+Body shows Shimmer
+↓
+API fetch happens
+↓
+State updates
+↓
+Restaurant cards show
+↓
+Click card
+↓
+Route changes
+↓
+RestroMenu loads
+
+🧠 Most Important Concepts You Used
+
+React Router
+Nested Routes
+Outlet
+Dynamic Route (:resid)
+useState
+useEffect
+Controlled Input
+Conditional Rendering
+Props
+Re-render cycle
+
+🎯 Final Simple Understanding
+
+Think your app like:
+Header = Fixed top bar
+Outlet = TV screen
+Router = Remote control
+State = Electricity
+useEffect = Power switch for API
+
+
+-------  Original Code -------
+
+---------- App.js ---------- :
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import Header from "./component/Header";
+import Body from "./component/Body";
+import About from "./component/About";
+import Contact from "./component/Contact";
+import Error from "./component/Error";
+import { createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
+import Career from "./component/Career";
+import RestroMenu from "./component/RestroMenu";
+
+// Main App Component
+const AppLayout  = () => {
+    return (
+        <div className = "app">
+            <Header />
+            <Outlet />
+        </div>
+    );
+};
+
+const appRouter = createBrowserRouter(
+    [
+    // Way - 1: Route
+
+    //    {
+    //     path: "/",
+    //     element: <AppLayout />,
+    //     // Way to handle error in the routing
+    //     errorElement: <Error />,
+    //    },
+    //    {
+    //     path: "/about",
+    //     element: <About />,
+    //    },
+    //    {
+    //     path: "/contact",
+    //     element: <Contact />,
+    //    },
+    //    {
+    //     path: "/career",
+    //     element: <Career />
+    //    }
+
+
+    // Way - 2 : Use children route
+
+    {
+        path: "/",
+        element: <AppLayout />,
+        children: [
+            {
+                path: "/",
+                element: <Body />,
+            },
+            {
+                path: "/about",
+                element: <About />,
+            },
+            {
+                path: "/contact",
+                element: <Contact />,
+            },
+            {
+                path: "/career",
+                element: <Career />,
+             },
+            //  To get different restaurant menu pass different id according to restaurant
+             {
+                path: "/restaurants/:resid",
+                element: <RestroMenu />,
+             }
+        ],
+        errorElement: <Error />,
+    },
+]);
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+// root.render(<AppLayout/>);
+
+// Router provide actually provide the routing configuration to your app 
+root.render(<RouterProvider router={appRouter} />);
+
+---------- Header.js ---------- :
+
+import { LOGO_URL } from "../Utils/constants";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+// Header Component
+const Header = () => {
+
+    let btnName = "login";
+    
+    // Always use useState inside component keep it in top inside functional component
+    const [btnNameReact, setbtnNameReact] = useState("Login");
+    console.log("Header render");
+
+    // if no dependency array => useEffect will be called on every render
+    // if dependency array is empty = [] -> useEffect will be called on initial render(just once)
+    // if dependency array is [btnNameReact] -> useEffect will be called everytime btnNameReact is updated.
+    useEffect(() => {
+        console.log("useEffect called");
+    }, [btnNameReact]);
+
+    return (
+        <div className="header">
+            <div className="logo-container">
+                <img className="logo" src={LOGO_URL} />
+            </div>
+            <div className="nav-items">
+                <ul>
+                    <li>
+                     <Link to="/">Home</Link>   
+                    </li>
+                    <li>
+                     <Link to="/about">About</Link>   
+                    </li>
+                    <li>
+                     <Link to="/contact">Contact</Link>   
+                    </li>
+                    <li>
+                     <Link to="/career">Career</Link>   
+                    </li>
+        
+                    <button className="login" onClick={() => {
+                        btnNameReact === "Login" ? setbtnNameReact("Logout") : setbtnNameReact("Login"); 
+                        // console.log(setbtnNameReact);
+                    }}>{btnNameReact}</button>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default Header;
+
+---------- Body.js ---------- :
+
+import RestroCard from "./RestroCard";
+// import restroList from "../Utils/mockData";
+import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
+
+const Body = () => {
+
+    // Local State Variable - super powerful variable
+    //    const [listOfRestro, setListOfRestro] = useState(restroList);
+    
+       const [listOfRestro, setListOfRestro] = useState([]);
+       const [filteredRestro, setFilteredRestro] = useState([]);
+
+       const [searchText, setSearchText] = useState("");
+
+       // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
+       console.log("Body Rendered");
+       useEffect(() => {
+        fetchData();
+       },[]);
+
+       const fetchData = async() => {
+        
+        // Namaste React API
+        const data = await fetch("https://corsproxy.io/?url=https://namastedev.com/api/v1/listRestaurants");
+
+        //Swiggy Live API
+        // const data = await fetch("https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.2291528&lng=85.51101039999999&carousel=true&third_party_vendor=1");
+        const json = await data.json();
+
+        console.log(json);
+
+        // Namaste React API Use Optional chaining to handling the data 
+        const restaurantData = json?.data?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // Swiggy API optional chaining to handling the data
+        // const restaurantData = json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // It will get data from live API not from mock data
+        // Way 1: Actual live swiggy api
+        // setListOfRestro(json.data.cards[1].card.card.gridElements.infoWithStyle.restaurants);
+        // Way 2: Use Namaste React Live api
+        setListOfRestro(restaurantData || []);
+        setFilteredRestro(restaurantData || []);
+    }
+
+    // Normal JS Variable 
+    // let listOfRestro = [];
+
+    // Loading when API is loaded
+    // if(listOfRestro.length === 0) {
+    //     return <Shimmer />;
+    // }
+    return (
+        <div className="body">
+            <div className="Interract">
+            <div className="search">
+                <input type="text" className="search-box"
+                value={searchText} onChange={(e) => {
+                    setSearchText(e.target.value);
+                }}></input>
+                <button className="search-btn"
+                onClick={() => {
+                    // Filter the restro cards and update the UI
+                    // searchText
+                    console.log(searchText);
+                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+                    setFilteredRestro(filteredRestro);
+                }}>Search</button>
+            </div>
+            <div className="filter">
+                <button className="filter-btn" onClick={() => {
+                    const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
+                    setFilteredRestro(filteredRestro);
+                    console.log(filteredRestro);
+                }}>Top Rated</button>
+            </div>
+            </div>
+            {/* Conditional Rendering */}
+            {
+                listOfRestro.length === 0 ? (
+                    <Shimmer />
+                ) : (
+                    <div className="res-container">
+                    {
+                        filteredRestro.map((restaurant) => (
+                           <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}><RestroCard resData = {restaurant} /></Link> 
+                        ))
+                    }
+                </div>
+                )
+            }
+
+        </div>
+    );
+};
+
+export default Body;
+
+------- RestroMenu.js ------
+
+import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { useParams } from "react-router-dom";
+import { MENU_API } from "../Utils/constants";
+
+const RestroMenu = () => {
+
+    const [resInfo, setResInfo] = useState(null);
+    const { resid } = useParams();
+
+    useEffect(() => {
+        fetchMenu();
+    }, []);
+
+    const fetchMenu = async () => {
+        const data = await fetch(MENU_API + resid);
+        const json = await data.json();
+        setResInfo(json.data);
+    };
+
+    // ✅ Loading guard
+    if (!resInfo) {
+        return <Shimmer />;
+    }
+
+    // ✅ Restaurant Info
+    const info = resInfo?.cards?.[2]?.card?.card?.info;
+    const { name, cuisines, costForTwoMessage } = info || {};
+
+    // ✅ Get Regular Cards Safely
+    const regularCards = resInfo?.cards
+        ?.find(card => card.groupedCard)
+        ?.groupedCard?.cardGroupMap?.REGULAR?.cards;
+
+    // ✅ Find section that contains itemCards
+    const itemSection = regularCards?.find(
+        c => c?.card?.card?.itemCards
+    );
+
+    const itemCards = itemSection?.card?.card?.itemCards;
+
+    // ✅ If still no items
+    if (!itemCards) {
+        return <Shimmer />;
+    }
+
+    return (
+        <div className="menu">
+            <h1>{name}</h1>
+            <p>{cuisines?.join(", ")}</p>
+            <h3>{costForTwoMessage}</h3>
+
+            <h2>Menu</h2>
+
+            <ul>
+                {itemCards.map((item) => (
+                    <li key={item.card.info.id}>
+                        {item.card.info.name} - Rs.
+                        {(item.card.info.price ||
+                          item.card.info.defaultPrice) / 100}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default RestroMenu;
+
+---------- Error.js ---------
+
+import { useRouteError } from "react-router-dom";
+
+const Error = () => {
+    const err = useRouteError();
+    console.log(err);
+    return (
+        <div>
+            <h2>Oops!</h2>
+            <h2>  {err.data}!</h2>
+            <h2>{err.status} : {err.statusText}</h2>
+        </div>
+    );
+};
+
+export default Error;
+
+---------- Career.js ----------
+
+const Career = () => {
+    return (
+        <div>
+            <h1>This is my career page!</h1>
+        </div>
+    )
+}
+
+export default Career;
+
+---------- Contact.js ----------
+
+const Contact = () => {
+    return (
+        <div>
+            <h1>This is my contact us page!</h1>
+        </div>
+    )
+}
+
+export default Contact;
+
+---------- About.js ----------
+
+const About = () => {
+    return (
+        <div className="about-us">
+            <h1>Hi This is my about us page</h1>
+        </div>
+    )
+}
+
+export default About;
+
+
+---------- Constant.js ----------
+
+export const CDN_URL = "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/";
+
+export const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGV3FW8X2F4PD8IYz9J_pOqcUqHWcaeAr7Gq7AEUHWzzoOPLR59bmzXQ4&s";
+
+export const MENU_API = "https://corsproxy.io/?url=https://namastedev.com/api/v1/listRestaurantMenu/";
