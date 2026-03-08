@@ -9,13 +9,13 @@ const Header = () => {
     
     // Always use useState inside component keep it in top inside functional component
     const [btnNameReact, setbtnNameReact] = useState("Login");
-    console.log("Header render");
+    // console.log("Header render");
 
     // if no dependency array => useEffect will be called on every render
     // if dependency array is empty = [] -> useEffect will be called on initial render(just once)
     // if dependency array is [btnNameReact] -> useEffect will be called everytime btnNameReact is updated.
     useEffect(() => {
-        console.log("useEffect called");
+        // console.log("useEffect called");
     }, [btnNameReact]);
 
     return (

@@ -132,3 +132,11 @@
       background-position: 200% 0;
     }
   }
+
+  /* About */
+
+  .user-card{
+    border: 1px solid black;
+    padding: 5px;
+    margin: 0;
+  }

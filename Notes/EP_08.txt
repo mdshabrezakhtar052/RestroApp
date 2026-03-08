@@ -1,0 +1,939 @@
+/* ORIGINAL CODE - 1 */
+
+{ ABOUT.JS }
+
+import React from "react";
+// import User from "./User";
+import UserClass from "./UserClass";
+
+// import { Component } from "react"; - We can write {class About extends Component}instead of React.Component
+
+// Functional compoenent
+// const About = () => {
+//     return (
+//         <div className="about-us">
+//             <h1>Hi This is my about us page</h1>
+//             {/* <User name={"Shabrez (Function)"}/> */}
+//             <UserClass name={"Shabrez (Class)"}/>
+//         </div>
+//     )
+// }
+
+// Class Based Component
+class About extends React.Component {
+    constructor(props){
+        super(props);
+
+        // console.log("Parent Constructor");
+    }
+
+    componentDidMount(){
+        // console.log("Parent ComponentDidMount Called");
+    }
+
+    render(){
+        // console.log("Parent Render");
+        return (
+            <div>
+                <h1>Hi This is my about us page</h1>
+                <UserClass name={"1_Shabrez (Class)"}/>
+                {/* <UserClass name={"2_Sameer  (Class)"}/> */}
+            </div>
+        );
+    }
+}
+
+export default About;
+
+// Child Parent Relations Component Life Cycle Works:
+/*
+ Parent Constructor Called -> Parent Render Called 
+ -> Child Constructor Called -> Child Render Called 
+ -> Child componentDidMount Called -> Parent componentDidMount Called
+*/
+
+{USER FUNCTIONAL COMPONENT}
+
+import { useEffect, useState } from "react";
+
+const User = ({name}) => {
+
+    const [count] = useState(0);
+    const [count1] = useState(1);
+
+    useEffect(() => {
+        // API Calls
+    }, []);
+
+    return (
+        <div className="user-card">
+            <h3>id: {count}</h3>
+            <h4>Emp Num: {count1}</h4>
+            <h4>Name: Md {name} Akhtar</h4>
+            <h4>Location: Biharsharif</h4>
+            <h4>Contact: @Shabrez551999</h4>
+        </div>
+    );
+};
+
+export default User;
+
+
+{USERCLASS.JS CLASS BASED COMPONENT}
+
+import React from "react";
+
+class UserClass extends React.Component {
+
+    constructor(props){
+        super(props);
+
+        // We created state variable
+        this.state = {
+            // count: 0,
+            // count1:1,
+            userInfo: {
+                name: "Dummy",
+                location: "Default",
+            },
+        };
+
+        // console.log(this.props.name + "Child Constructor called");
+    }
+
+    // Similar to useEffect - We make an api calls inside componentDidMount & Why we make inside componentDidMount to just quickly render my component then call API
+    async componentDidMount(){
+        // console.log(this.props.name + "Child ComponentDidMount Called");
+
+        // API Calls
+        const data = await fetch("https://api.github.com/users/Shabrez575");
+        const json = await data.json();
+
+        // Update state variable with data
+        this.setState({
+            userInfo: json,
+        })
+
+        console.log(json);
+
+    }
+
+    componentDidUpdate(){
+        console.log("Component Did Update");
+    }
+
+    componentWillUnmount(){
+        console.log("Component will unmount");
+    }
+
+    render(){
+        // const {count, count1} = this.state;
+
+        // console.log(this.props.name + "Child Render Called");
+
+        const {name, location, login, avatar_url} = this.state.userInfo;
+
+        return (
+            <div className="user-card">
+
+            <img src={avatar_url}/>
+                
+            {/* <h4>Count : {count}</h4> */}
+            <button onClick={() => {
+                // NEVER UPDATE STATE VARIABLE DIRECTLY
+                this.setState({
+                    // count: this.state.count + 1,
+                    // count2: this.state.count2 + 1,
+                })
+            }}>Count++</button>
+            {/* <h4>Emp Num: {count1}</h4> */}
+            {/* Below is update component with the updated data */}
+            <h4>Name: {name}</h4>
+            <h4>Location: {location}</h4>
+            <h4>Github ID: {login}</h4>
+        </div>
+        )
+    }
+};
+
+export default UserClass;
+
+// Life Cycle:
+// Child Constructor Called -> Child Render Called -> Child ComponentDidMount
+
+/*
+Parent Constructor
+Parent Render
+
+Child Constructor (Shabrez)
+Child Render (Shabrez)
+
+Child Constructor (Sameer)
+Child Render (Sameer)
+
+Child ComponentDidMount (Shabrez)
+Child ComponentDidMount (Sameer)
+
+Parent ComponentDidMount
+*/
+
+// MOUNTING
+
+/*
+CONSTRUCTOR (DUMMY)
+RENDER (DUMMY)
+    <HTML DUMMY>
+
+COMPONENT DID MOUNT
+    <API CALL>
+    <this.setState> -> State variable is updated
+     
+--- Update -----
+
+    render(API data)
+    <HTML (new APi data)>
+
+componentDid update
+    
+*/
+
+/* CODE UNDERSTANDING - 2 */
+
+We will cover:
+
+1️⃣ About.js
+2️⃣ User.js (Functional Component)
+3️⃣ UserClass.js (Class Component)
+4️⃣ Lifecycle flow
+
+1️⃣ ABOUT.JS — Simple Notes (Line by Line)
+Import Section
+import React from "react";
+Meaning
+
+This imports the React library.
+
+Why needed?
+
+Because we are creating a class component.
+
+React provides:
+
+Component
+Lifecycle methods
+JSX support
+// import User from "./User";
+Meaning
+
+This line imports the functional component User.js.
+
+But it is commented, so React will not use it.
+
+import UserClass from "./UserClass";
+Meaning
+
+This imports the UserClass component.
+
+File structure example:
+
+About.js
+UserClass.js
+
+So About.js can use UserClass inside it.
+
+// import { Component } from "react";
+
+This is another way to import Component.
+
+If we write:
+
+import { Component } from "react";
+
+Then we can write:
+
+class About extends Component
+
+Instead of:
+
+class About extends React.Component
+
+Both are correct.
+
+Functional Component (Commented)
+// const About = () => {
+//     return (
+//         <div className="about-us">
+//             <h1>Hi This is my about us page</h1>
+//             <UserClass name={"Shabrez (Class)"}/>
+//         </div>
+//     )
+// }
+
+This is the functional version of the About component.
+
+React supports two component types:
+
+Functional Components
+Class Components
+
+But you are currently using class component version.
+
+Class Component
+class About extends React.Component {
+
+Meaning:
+
+Create a class component named About
+
+It inherits features from:
+
+React.Component
+
+This gives access to:
+
+render()
+state
+props
+lifecycle methods
+Constructor
+constructor(props){
+
+The constructor runs first when component is created.
+
+Purpose:
+
+initialize state
+access props
+super(props);
+
+This calls the parent constructor (React.Component).
+
+Without super(props):
+
+this.props will not work
+// console.log("Parent Constructor");
+
+If enabled, this prints when constructor runs.
+
+Example console:
+
+Parent Constructor
+componentDidMount()
+componentDidMount(){
+
+Lifecycle method.
+
+Runs after the component appears on the screen.
+
+Used for:
+
+API calls
+fetch data
+DOM operations
+// console.log("Parent ComponentDidMount Called");
+
+If enabled, console shows:
+
+Parent ComponentDidMount Called
+Render Method
+render(){
+
+The render method creates the UI.
+
+React calls render whenever:
+
+component loads
+state changes
+props change
+return (
+
+Return JSX (HTML-like structure).
+
+<div>
+
+Root container for the component UI.
+
+<h1>Hi This is my about us page</h1>
+
+Displays heading text.
+
+<UserClass name={"1_Shabrez (Class)"}/>
+
+This renders UserClass component.
+
+And passes props.
+
+Prop:
+
+name = "1_Shabrez (Class)"
+
+Inside UserClass we can access:
+
+this.props.name
+{/* <UserClass name={"2_Sameer  (Class)"}/> */}
+
+This is another child component.
+
+If enabled:
+
+Two UserClass components will render
+
+Example:
+
+User 1
+User 2
+export default About;
+
+Exports the component so other files can import it.
+
+Example:
+
+import About from "./About"
+Lifecycle Order (Important)
+
+When About page loads:
+
+Parent Constructor
+Parent Render
+
+Child Constructor
+Child Render
+
+Child componentDidMount
+Parent componentDidMount
+2️⃣ USER.JS — Functional Component Notes
+Import Hooks
+import { useEffect, useState } from "react";
+
+Two React hooks imported:
+
+useState → create state variables
+useEffect → perform side effects
+Functional Component
+const User = ({name}) => {
+
+This component receives props.
+
+Example usage:
+
+<User name="Shabrez"/>
+
+Inside component:
+
+name = "Shabrez"
+Creating State
+const [count] = useState(0);
+
+State variable:
+
+count = 0
+const [count1] = useState(1);
+
+Another state variable:
+
+count1 = 1
+
+Normally we write:
+
+const [count, setCount] = useState(0)
+
+But here setter is not used.
+
+useEffect
+useEffect(() => {
+
+This hook runs after component renders.
+
+Used for:
+
+API calls
+timers
+subscriptions
+}, []);
+
+Empty dependency array.
+
+Meaning:
+
+Run only once when component loads
+
+Equivalent to:
+
+componentDidMount
+Return UI
+return (
+
+Return JSX.
+
+<div className="user-card">
+
+Creates a card container.
+
+<h3>id: {count}</h3>
+
+Displays:
+
+id: 0
+<h4>Emp Num: {count1}</h4>
+
+Displays:
+
+Emp Num: 1
+<h4>Name: Md {name} Akhtar</h4>
+
+Dynamic name using props.
+
+Example output:
+
+Name: Md Shabrez Akhtar
+<h4>Location: Biharsharif</h4>
+
+Static location text.
+
+<h4>Contact: @Shabrez551999</h4>
+
+Displays contact username.
+
+export default User;
+
+Exports the component.
+
+3️⃣ USERCLASS.JS — Class Component Notes
+Import React
+import React from "react";
+
+Required to create class components.
+
+Class Declaration
+class UserClass extends React.Component
+
+Create a class component named:
+
+UserClass
+Constructor
+constructor(props){
+
+Runs when component is created.
+
+super(props);
+
+Allows access to:
+
+this.props
+State Initialization
+this.state = {
+
+Creates component state.
+
+userInfo: {
+    name: "Dummy",
+    location: "Default",
+},
+
+Initial values before API loads.
+
+So UI first shows:
+
+Dummy
+Default
+
+Then updates later.
+
+componentDidMount()
+async componentDidMount(){
+
+Lifecycle method.
+
+Runs after component appears on screen.
+
+API Call
+const data = await fetch("https://api.github.com/users/Shabrez575");
+
+Fetch GitHub user data.
+
+const json = await data.json();
+
+Convert response to JSON.
+
+Example response:
+
+name
+login
+location
+avatar_url
+Updating State
+this.setState({
+userInfo: json
+})
+
+State becomes:
+
+userInfo = API DATA
+
+React automatically:
+
+re-renders component
+componentDidUpdate()
+componentDidUpdate(){
+
+Runs whenever:
+
+state changes
+props change
+console.log("Component Did Update");
+
+Logs update in console.
+
+componentWillUnmount()
+componentWillUnmount(){
+
+Runs when component is removed.
+
+Example:
+
+navigating to another page
+Render Method
+render(){
+
+Creates UI.
+
+Destructuring State
+const {name, location, login, avatar_url} = this.state.userInfo;
+
+Extract data from state.
+
+UI
+<img src={avatar_url}/>
+
+Shows GitHub profile image.
+
+<button onClick={() => {
+this.setState({})
+}}>
+Count++
+</button>
+
+Button for updating state.
+
+But currently no state change is written.
+
+Display User Data
+<h4>Name: {name}</h4>
+
+Example:
+
+Name: Shabrez
+<h4>Location: {location}</h4>
+
+Example:
+
+Location: India
+<h4>Github ID: {login}</h4>
+
+Example:
+
+Github ID: Shabrez575
+Export Component
+export default UserClass;
+
+Allows import in other files.
+
+4️⃣ Component Lifecycle Visualization
+
+When About page loads:
+
+About Constructor
+About Render
+
+UserClass Constructor
+UserClass Render
+
+UserClass componentDidMount
+About componentDidMount
+5️⃣ After API Returns Data
+GitHub API Response
+        ↓
+setState()
+        ↓
+React Re-render
+        ↓
+componentDidUpdate()
+Final UI Output
+Hi This is my about us page
+
+[Profile Image]
+
+Name: Shabrez
+Location: India
+Github ID: Shabrez575
+
+/* React Lifecycle Cheat Sheet (Class vs Functional) - 3 */
+
+React Lifecycle Cheat Sheet (Class vs Functional)
+
+Think of React components like a human life cycle:
+
+Birth → Life → Update → Death
+
+In React:
+
+Mounting → Updating → Unmounting
+1️⃣ Mounting Phase (Component is Created)
+
+This phase happens when the component appears on the screen for the first time.
+
+Class Component Lifecycle
+
+Order:
+
+constructor()
+   ↓
+render()
+   ↓
+componentDidMount()
+
+Example from your code (UserClass.js):
+
+constructor(props){
+ super(props);
+
+ this.state = {
+   userInfo:{
+     name:"Dummy",
+     location:"Default"
+   }
+ }
+}
+constructor()
+
+Purpose:
+
+Initialize state
+Access props
+
+Example:
+
+name = Dummy
+location = Default
+render()
+render(){
+ return(
+  <div>
+   <h4>Name: {name}</h4>
+  </div>
+ )
+}
+
+Purpose:
+
+Create UI
+Return JSX
+
+React converts JSX into DOM elements.
+
+componentDidMount()
+async componentDidMount(){
+ const data = await fetch("API");
+ const json = await data.json();
+
+ this.setState({
+  userInfo: json
+ });
+}
+
+Purpose:
+
+API calls
+Data fetching
+Subscriptions
+
+This runs after UI appears.
+
+Functional Component Equivalent
+
+Functional components do not have lifecycle methods.
+
+They use Hooks.
+
+Equivalent:
+
+componentDidMount → useEffect
+
+Example from your User.js:
+
+useEffect(() => {
+  // API call
+}, []);
+
+Meaning:
+
+Run once when component loads
+2️⃣ Updating Phase (Component Re-renders)
+
+This happens when:
+
+state changes
+props change
+Class Component
+
+Lifecycle methods:
+
+render()
+componentDidUpdate()
+
+Example:
+
+componentDidUpdate(){
+ console.log("Component Updated");
+}
+
+Trigger example:
+
+this.setState()
+
+Example flow:
+
+API response
+   ↓
+setState()
+   ↓
+render()
+   ↓
+componentDidUpdate()
+Functional Component Equivalent
+useEffect(() => {
+
+}, [stateVariable])
+
+Example:
+
+Run effect when stateVariable changes
+
+Example:
+
+useEffect(()=>{
+ console.log("State Updated");
+},[count]);
+3️⃣ Unmounting Phase (Component Removed)
+
+This happens when the component disappears from the screen.
+
+Example:
+
+Navigate to another page
+Component removed
+Class Component
+
+Lifecycle method:
+
+componentWillUnmount()
+
+Example:
+
+componentWillUnmount(){
+ console.log("Component Removed");
+}
+
+Purpose:
+
+Clear timers
+Cancel API calls
+Remove event listeners
+Functional Component Equivalent
+
+Cleanup function inside useEffect.
+
+Example:
+
+useEffect(()=>{
+
+ return ()=>{
+   console.log("Component Removed");
+ }
+
+},[])
+Complete Lifecycle Comparison
+Phase	Class Component	Functional Component
+Mount	constructor()	useState()
+Mount	render()	return JSX
+Mount	componentDidMount()	useEffect(()=>{},[])
+Update	render()	return JSX
+Update	componentDidUpdate()	useEffect(()=>{},[state])
+Unmount	componentWillUnmount()	cleanup in useEffect
+Lifecycle Flow in YOUR Code
+
+When your About Page loads:
+
+About Constructor
+About Render
+
+UserClass Constructor
+UserClass Render
+
+UserClass componentDidMount
+About componentDidMount
+
+Then:
+
+GitHub API Call
+       ↓
+setState()
+       ↓
+UserClass render()
+       ↓
+componentDidUpdate()
+Visual Flow
+Page Loads
+   │
+   ▼
+About Component Created
+   │
+   ▼
+UserClass Component Created
+   │
+   ▼
+GitHub API Request
+   │
+   ▼
+API Response
+   │
+   ▼
+setState()
+   │
+   ▼
+Component Re-render
+Simple Memory Trick
+
+Remember this order for Class Components:
+
+Constructor
+Render
+ComponentDidMount
+ComponentDidUpdate
+ComponentWillUnmount
+
+Shortcut:
+
+C → R → M → U → W
+Real Output of Your Code
+
+Your screen shows:
+
+Hi This is my about us page
+
+[Github Profile Image]
+
+Name: Shabrez
+Location: India
+Github ID: Shabrez575
+
+✅ Now you understand:
+
+React Lifecycle
+Class Components
+Functional Components
+Hooks
+State
+Props
+API Fetching
+Re-rendering
