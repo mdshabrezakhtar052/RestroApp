@@ -1,0 +1,415 @@
+- APP.JS
+
+import React, {lazy, Suspense} from "react";
+import ReactDOM from "react-dom/client";
+import Header from "./component/Header";
+import Body from "./component/Body";
+import About from "./component/About";
+import Contact from "./component/Contact";
+import Error from "./component/Error";
+import { createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
+import Career from "./component/Career";
+import RestroMenu from "./component/RestroMenu";
+// import Grocery from "./component/Grocery";
+
+//  Dynamic Bundling
+//  Chunking
+//  Code Splitting
+//  lazy loading
+//  on demand loading
+
+
+const Grocery = lazy(() => import("./component/Grocery"));
+
+// Main App Component
+const AppLayout  = () => {
+    return (
+        <div className = "app">
+            <Header />
+            <Outlet />
+        </div>
+    );
+};
+
+const appRouter = createBrowserRouter(
+    [
+    // Way - 1: Route
+
+    //    {
+    //     path: "/",
+    //     element: <AppLayout />,
+    //     // Way to handle error in the routing
+    //     errorElement: <Error />,
+    //    },
+    //    {
+    //     path: "/about",
+    //     element: <About />,
+    //    },
+    //    {
+    //     path: "/contact",
+    //     element: <Contact />,
+    //    },
+    //    {
+    //     path: "/career",
+    //     element: <Career />
+    //    }
+
+
+    // Way - 2 : Use children route
+
+    {
+        path: "/",
+        element: <AppLayout />,
+        children: [
+            {
+                path: "/",
+                element: <Body />,
+            },
+            {
+                path: "/about",
+                element: <About />,
+            },
+            {
+                path: "/contact",
+                element: <Contact />,
+            },
+            {
+                path: "/career",
+                element: <Career />,
+             },
+             {
+                path: "/grocery",
+                element: <Suspense fallback={<h1>Loading...</h1>}><Grocery /></Suspense>,
+             },
+            //  To get different restaurant menu pass different id according to restaurant
+             {
+                path: "/restaurants/:resid",
+                element: <RestroMenu />,
+             },
+        ],
+        errorElement: <Error />,
+    },
+]);
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+// root.render(<AppLayout/>);
+
+// Router provide actually provide the routing configuration to your app 
+root.render(<RouterProvider router={appRouter} />);
+
+- BODY.JS
+
+import RestroCard from "./RestroCard";
+// import restroList from "../Utils/mockData";
+import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
+import useOnlineStatus from "../Utils/useOnlineStatus";
+
+const Body = () => {
+
+    // Local State Variable - super powerful variable
+    //    const [listOfRestro, setListOfRestro] = useState(restroList);
+    
+       const [listOfRestro, setListOfRestro] = useState([]);
+       const [filteredRestro, setFilteredRestro] = useState([]);
+
+       const [searchText, setSearchText] = useState("");
+       const onlineStatus = useOnlineStatus();
+       // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
+       console.log("Body Rendered");
+       useEffect(() => {
+        fetchData();
+       },[]);
+
+       const fetchData = async() => {
+        
+        // Namaste React API
+        const data = await fetch("https://corsproxy.io/?url=https://namastedev.com/api/v1/listRestaurants");
+
+        //Swiggy Live API
+        // const data = await fetch("https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.2291528&lng=85.51101039999999&carousel=true&third_party_vendor=1");
+        const json = await data.json();
+
+        console.log(json);
+
+        // Namaste React API Use Optional chaining to handling the data 
+        const restaurantData = json?.data?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // Swiggy API optional chaining to handling the data
+        // const restaurantData = json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // It will get data from live API not from mock data
+        // Way 1: Actual live swiggy api
+        // setListOfRestro(json.data.cards[1].card.card.gridElements.infoWithStyle.restaurants);
+        // Way 2: Use Namaste React Live api
+        setListOfRestro(restaurantData || []);
+        setFilteredRestro(restaurantData || []);
+    }
+
+    // Normal JS Variable 
+    // let listOfRestro = [];
+    
+    if(onlineStatus === false)
+        return(
+     <h1>Looks like you're offline! Please check your internet connection</h1>
+     )
+
+    // Loading when API is loaded
+    if(listOfRestro.length === 0) {
+        return <Shimmer />;
+    }
+
+    return (
+        <div className="body">
+            <div className="Interract">
+            <div className="search">
+                <input type="text" className="search-box"
+                value={searchText} onChange={(e) => {
+                    setSearchText(e.target.value);
+                }}></input>
+                <button className="search-btn"
+                onClick={() => {
+                    // Filter the restro cards and update the UI
+                    // searchText
+                    console.log(searchText);
+                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+                    setFilteredRestro(filteredRestro);
+                }}>Search</button>
+            </div>
+            <div className="filter">
+                <button className="filter-btn" onClick={() => {
+                    const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
+                    setFilteredRestro(filteredRestro);
+                    console.log(filteredRestro);
+                }}>Top Rated</button>
+            </div>
+            </div>
+            {/* Conditional Rendering */}
+            {
+                listOfRestro.length === 0 ? (
+                    <Shimmer />
+                ) : (
+                    <div className="res-container">
+                    {
+                        filteredRestro.map((restaurant) => (
+                           <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}><RestroCard resData = {restaurant} /></Link> 
+                        ))
+                    }
+                </div>
+                )
+            }
+
+        </div>
+    );
+};
+
+export default Body;
+
+- HEADER.JS
+
+import { LOGO_URL } from "../Utils/constants";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import useOnlineStatus from "../Utils/useOnlineStatus";
+
+// Header Component
+const Header = () => {
+
+    let btnName = "login";
+    
+    const onlineStatus = useOnlineStatus();
+
+    // Always use useState inside component keep it in top inside functional component
+    const [btnNameReact, setbtnNameReact] = useState("Login");
+    // console.log("Header render");
+
+    // if no dependency array => useEffect will be called on every render
+    // if dependency array is empty = [] -> useEffect will be called on initial render(just once)
+    // if dependency array is [btnNameReact] -> useEffect will be called everytime btnNameReact is updated.
+    useEffect(() => {
+        // console.log("useEffect called");
+    }, [btnNameReact]);
+
+    return (
+        <div className="header">
+            <div className="logo-container">
+                <img className="logo" src={LOGO_URL} />
+            </div>
+            <div className="nav-items">
+                <ul>
+                    <li>Online Status: {onlineStatus ? "🟢" : "🔴" }</li>
+                    <li>
+                     <Link to="/">Home</Link>   
+                    </li>
+                    <li>
+                     <Link to="/about">About</Link>   
+                    </li>
+                    <li>
+                     <Link to="/contact">Contact</Link>   
+                    </li>
+                    <li>
+                     <Link to="/career">Career</Link>   
+                    </li>
+                    <li>
+                     <Link to="/grocery">Grocery</Link>   
+                    </li>
+        
+                    <button className="login" onClick={() => {
+                        btnNameReact === "Login" ? setbtnNameReact("Logout") : setbtnNameReact("Login"); 
+                        // console.log(setbtnNameReact);
+                    }}>{btnNameReact}</button>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default Header;
+
+- RESTROMENU.JS 
+
+// Displaying the data logic responsibilty inside RestroMenu.js (trying to implement Single Responsibility Principle)
+
+// import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { useParams } from "react-router-dom";
+// import { MENU_API } from "../Utils/constants";
+import useRestroMenu from "../Utils/useRestroMenu";
+
+const RestroMenu = () => {
+
+    // const [resInfo, setResInfo] = useState(null);
+    const { resid } = useParams();
+
+    const resInfo = useRestroMenu(resid);
+
+    // useEffect(() => {
+    //     fetchMenu();
+    // }, []);
+
+    // const fetchMenu = async () => {
+    //     const data = await fetch(MENU_API + resid);
+    //     const json = await data.json();
+    //     setResInfo(json.data);
+    // };
+
+    // ✅ Loading guard
+    if (!resInfo) {
+        return <Shimmer />;
+    }
+
+    // ✅ Restaurant Info
+    const info = resInfo?.cards?.[2]?.card?.card?.info;
+    const { name, cuisines, costForTwoMessage } = info || {};
+
+    // ✅ Get Regular Cards Safely
+    const regularCards = resInfo?.cards
+        ?.find(card => card.groupedCard)
+        ?.groupedCard?.cardGroupMap?.REGULAR?.cards;
+
+    // ✅ Find section that contains itemCards
+    const itemSection = regularCards?.find(
+        c => c?.card?.card?.itemCards
+    );
+
+    const itemCards = itemSection?.card?.card?.itemCards;
+
+    // ✅ If still no items
+    if (!itemCards) {
+        return <Shimmer />;
+    }
+
+    return (
+        <div className="menu">
+            <h1>{name}</h1>
+            <p>{cuisines?.join(", ")}</p>
+            <h3>{costForTwoMessage}</h3>
+
+            <h2>Menu</h2>
+
+            <ul>
+                {itemCards.map((item) => (
+                    <li key={item.card.info.id}>
+                        {item.card.info.name} - Rs.
+                        {(item.card.info.price ||
+                          item.card.info.defaultPrice) / 100}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default RestroMenu;
+
+- GROCERY.JS 
+
+const Grocery = () => {
+    return (
+        <div>
+            <h1>
+                {" "}
+                Our Grocery Online Store!
+            </h1>
+        </div>
+    );
+};
+
+export default Grocery;
+
+- /Utils/useRestroMenu.js
+
+// Fetching data inside useRestroMenu hook.
+
+import { useEffect,useState } from "react";
+import { MENU_API } from "./constants";
+
+const useRestroMenu = (resid) => {
+    const [resInfo, setResInfo] = useState(null);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        const data = await fetch(MENU_API + resid);
+        const json  = await data.json();
+        setResInfo(json.data);
+    };
+
+    return resInfo;
+};
+
+export default useRestroMenu;
+
+- /Utils/useOnlineStatus.js 
+
+import { useEffect, useState } from "react";
+
+const useOnlineStatus = () => {
+    const [onlineStatus, setOnlineStatus] = useState(true);
+
+    useEffect(() => {
+        window.addEventListener("offline", () => {
+            setOnlineStatus(false);
+        });
+
+        window.addEventListener("online", () => {
+            setOnlineStatus(true);
+        });
+    }, []);
+
+    // boolean value
+    return onlineStatus;
+};
+
+export default useOnlineStatus;
+
+
+
+
+
+
+

@@ -3,6 +3,7 @@ import RestroCard from "./RestroCard";
 import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
 import { Link } from "react-router-dom";
+import useOnlineStatus from "../Utils/useOnlineStatus";
 
 const Body = () => {
 
@@ -13,7 +14,7 @@ const Body = () => {
        const [filteredRestro, setFilteredRestro] = useState([]);
 
        const [searchText, setSearchText] = useState("");
-
+       const onlineStatus = useOnlineStatus();
        // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
        console.log("Body Rendered");
        useEffect(() => {
@@ -47,11 +48,17 @@ const Body = () => {
 
     // Normal JS Variable 
     // let listOfRestro = [];
+    
+    if(onlineStatus === false)
+        return(
+     <h1>Looks like you're offline! Please check your internet connection</h1>
+     )
 
     // Loading when API is loaded
-    // if(listOfRestro.length === 0) {
-    //     return <Shimmer />;
-    // }
+    if(listOfRestro.length === 0) {
+        return <Shimmer />;
+    }
+
     return (
         <div className="body">
             <div className="Interract">

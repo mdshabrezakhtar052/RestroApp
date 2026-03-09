@@ -1,22 +1,27 @@
-import { useEffect, useState } from "react";
+// Displaying the data logic responsibilty inside RestroMenu.js (trying to implement Single Responsibility Principle)
+
+// import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
 import { useParams } from "react-router-dom";
-import { MENU_API } from "../Utils/constants";
+// import { MENU_API } from "../Utils/constants";
+import useRestroMenu from "../Utils/useRestroMenu";
 
 const RestroMenu = () => {
 
-    const [resInfo, setResInfo] = useState(null);
+    // const [resInfo, setResInfo] = useState(null);
     const { resid } = useParams();
 
-    useEffect(() => {
-        fetchMenu();
-    }, []);
+    const resInfo = useRestroMenu(resid);
 
-    const fetchMenu = async () => {
-        const data = await fetch(MENU_API + resid);
-        const json = await data.json();
-        setResInfo(json.data);
-    };
+    // useEffect(() => {
+    //     fetchMenu();
+    // }, []);
+
+    // const fetchMenu = async () => {
+    //     const data = await fetch(MENU_API + resid);
+    //     const json = await data.json();
+    //     setResInfo(json.data);
+    // };
 
     // ✅ Loading guard
     if (!resInfo) {
