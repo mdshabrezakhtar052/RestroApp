@@ -9,6 +9,7 @@
 7. SASS
 8. CORE CSS
 
+// NOTES:
 1 - EARLIER CORE CSS:
 
 .header{
@@ -153,3 +154,321 @@
     padding: 5px;
     margin: 0;
   }
+
+
+// Tailwind CSS :
+
+HEADER.JS :
+
+import { LOGO_URL } from "../Utils/constants";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import useOnlineStatus from "../Utils/useOnlineStatus";
+
+// Header Component
+const Header = () => {
+
+    let btnName = "login";
+    
+    const onlineStatus = useOnlineStatus();
+
+    // Always use useState inside component keep it in top inside functional component
+    const [btnNameReact, setbtnNameReact] = useState("Login");
+    // console.log("Header render");
+
+    // if no dependency array => useEffect will be called on every render
+    // if dependency array is empty = [] -> useEffect will be called on initial render(just once)
+    // if dependency array is [btnNameReact] -> useEffect will be called everytime btnNameReact is updated.
+    useEffect(() => {
+        // console.log("useEffect called");
+    }, [btnNameReact]);
+
+    return (
+        <div className="header flex justify-between items-center px-8 py-3 bg-white shadow-md sticky top-0 z-50">
+            <div className="logo-container flex items-center ">
+                <img className="logo w-16 h-16 object-contain cursor-pointer" src={LOGO_URL} />
+            </div>
+            <div className="nav-items flex items-center">
+                <ul className="flex items-center gap-8 font-medium text-gray-700">
+                    <li className="text-sm">
+                        Online Status: {onlineStatus ? "🟢" : "🔴" }
+                    </li>
+                    <li className="hover:text-orange-500 transition"> 
+                     <Link to="/">Home</Link>   
+                    </li>
+                    <li className="hover:text-orange-500 transition">
+                     <Link to="/about">About</Link>   
+                    </li>
+                    <li className="hover:text-orange-500 transition">
+                     <Link to="/contact">Contact</Link>   
+                    </li>
+                    <li className="hover:text-orange-500 transition">
+                     <Link to="/career">Career</Link>   
+                    </li>
+                    <li className="hover:text-orange-500 transition">
+                     <Link to="/grocery">Grocery</Link>   
+                    </li>
+        {/* Login Button */}
+                    <button className= {`px-4 py-2 text-white rounded-lg font-medium transition shadow
+            ${
+              btnNameReact === "Login"
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-red-500 hover:bg-red-600"
+            }`} onClick={() => {
+                        btnNameReact === "Login" ? setbtnNameReact("Logout") : setbtnNameReact("Login"); 
+                        // console.log(setbtnNameReact);
+                    }}>{btnNameReact}</button>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
+export default Header;
+
+BODY.JS :
+
+import RestroCard from "./RestroCard";
+// import restroList from "../Utils/mockData";
+import { useEffect, useState } from "react";
+import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
+import useOnlineStatus from "../Utils/useOnlineStatus";
+
+const Body = () => {
+
+    // Local State Variable - super powerful variable
+    //    const [listOfRestro, setListOfRestro] = useState(restroList);
+    
+       const [listOfRestro, setListOfRestro] = useState([]);
+       const [filteredRestro, setFilteredRestro] = useState([]);
+
+       const [searchText, setSearchText] = useState("");
+       const onlineStatus = useOnlineStatus();
+       // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
+       console.log("Body Rendered");
+       useEffect(() => {
+        fetchData();
+       },[]);
+
+       const fetchData = async() => {
+        
+        // Namaste React API
+        const data = await fetch("https://corsproxy.io/?url=https://namastedev.com/api/v1/listRestaurants");
+
+        //Swiggy Live API
+        // const data = await fetch("https://www.swiggy.com/mapi/restaurants/list/v5?offset=0&is-seo-homepage-enabled=true&lat=25.2291528&lng=85.51101039999999&carousel=true&third_party_vendor=1");
+        const json = await data.json();
+
+        console.log(json);
+
+        // Namaste React API Use Optional chaining to handling the data 
+        const restaurantData = json?.data?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // Swiggy API optional chaining to handling the data
+        // const restaurantData = json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+
+        // It will get data from live API not from mock data
+        // Way 1: Actual live swiggy api
+        // setListOfRestro(json.data.cards[1].card.card.gridElements.infoWithStyle.restaurants);
+        // Way 2: Use Namaste React Live api
+        setListOfRestro(restaurantData || []);
+        setFilteredRestro(restaurantData || []);
+    }
+
+    // Normal JS Variable 
+    // let listOfRestro = [];
+
+    if(onlineStatus === false)
+        return(
+     <h1 className="text-center text-xl font-semibold mt-10">Looks like you're offline! Please check your internet connection</h1>
+     )
+
+    // Loading when API is loaded
+    if(listOfRestro.length === 0) {
+        return <Shimmer />;
+    }
+
+    return (
+        <div className="body px-10 py-6">
+            <div className="Interract flex justify-between items-center mb-6">
+            <div className="search flex items-center gap-3">
+                <input type="text" className="search-box x-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                value={searchText} onChange={(e) => {
+                    setSearchText(e.target.value);
+                }}></input>
+                <button className="search-btn px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
+                onClick={() => {
+                    // Filter the restro cards and update the UI
+                    // searchText
+                    console.log(searchText);
+                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+                    setFilteredRestro(filteredRestro);
+                }}>Search</button>
+            </div>
+            <div className="filter">
+                <button className="filter-btn px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition cursor-pointer" onClick={() => {
+                    const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
+                    setFilteredRestro(filteredRestro);
+                    console.log(filteredRestro);
+                }}>Top Rated</button>
+            </div>
+            </div>
+            {/* Conditional Rendering */}
+            {
+                listOfRestro.length === 0 ? (
+                    <Shimmer />
+                ) : (
+                    <div className="res-container flex flex-wrap justify-center">
+                    {
+                        filteredRestro.map((restaurant) => (
+                           <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}><RestroCard resData = {restaurant} /></Link> 
+                        ))
+                    }
+                </div>
+                )
+            }
+
+        </div>
+    );
+};
+
+export default Body;
+
+RESTROCARD.JS :
+
+import { CDN_URL } from "../Utils/constants";
+
+// Apply CSS 
+const styleCard = {
+    backgroundColor: "#f0f0f0",
+};
+
+const RestroCard = (props) => {
+    console.log(props);
+    const {resData} = props;
+    // Destructure - Object Data
+    const {cloudinaryImageId,name,avgRating,cuisines,costForTwo} = resData?.info
+ 
+     // Destructure props - Another way to do
+     const {rating, delivery} = props;
+ 
+     return (
+         <div className="res-card m-4 w-64 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer" style={styleCard}>
+             <img 
+             className="res-img w-full h-40 object-cover"
+             alt="res-img"
+             src={CDN_URL + resData.info.cloudinaryImageId} />
+ 
+             {/* Using API */}
+             <div className="p-3">
+             <h3 className="font-bold text-lg truncate">{name}</h3>
+             <p className="text-gray-600 text-sm truncate">{cuisines.join(", ")}</p>
+             <div className="flex justify-between items-center mt-2">
+                <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">
+                ⭐️ {avgRating}
+                </span>
+                <span className="text-gray-700 text-sm font-medium">
+                {costForTwo}
+                </span>
+             </div>
+        
+             </div>
+            
+         </div>
+     );
+ };
+
+ export default RestroCard;
+
+ SHIMMER.JS :
+
+ const Shimmer = () => {
+    return (
+        <div className="shimmer-container px-8 py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {
+                Array(9).fill("").map((_, index) => (
+                    <div key={index} className="shimmer-card bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+
+                        {/* Image Skeleton */}
+                        <div className="shimmer-img h-40 w-full bg-gray-300"></div>
+
+                        {/* Content Skeleton */}
+                           <div className="shimmer-content p-4 space-y-3">
+                              <div className="shimmer-line title h-4 bg-gray-300 rounded w-3/4"></div>
+                              <div className="shimmer-line title h-3 bg-gray-300 rounded w-full"></div>
+                              <div className="shimmer-line title h-3 bg-gray-300 rounded w-2/3"></div>
+                           </div>
+                        </div>
+                ))}
+        </div>
+    );
+};
+
+export default Shimmer;
+
+ABOUT.JS :
+
+import React from "react";
+// import User from "./User";
+import UserClass from "./UserClass";
+
+// import { Component } from "react"; - We can write {class About extends Component}instead of React.Component
+
+// Functional compoenent
+// const About = () => {
+//     return (
+//         <div className="about-us">
+//             <h1>Hi This is my about us page</h1>
+//             {/* <User name={"Shabrez (Function)"}/> */}
+//             <UserClass name={"Shabrez (Class)"}/>
+//         </div>
+//     )
+// }
+
+// Class Based Component
+class About extends React.Component {
+    constructor(props){
+        super(props);
+
+        // console.log("Parent Constructor");
+    }
+
+    componentDidMount(){
+        // console.log("Parent ComponentDidMount Called");
+    }
+
+    render(){
+        // console.log("Parent Render");
+        return (
+            <div className="max-w-5xl mx-auto px-6 py-10">
+                <div className="bg-white shadow-lg rounded-xl p-8">
+                <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                   About Us
+                </h1>
+
+                <p className="text-gray-600 mb-6">
+                    Welcome to our food ordering platform. We help you discover the
+                    best restaurants around you and enjoy delicious meals delivered
+                    to your doorstep.
+                </p> 
+               <div className="border-t pt-6"> 
+               <UserClass name={"1_Shabrez (Class)"}/>
+               {/* <UserClass name={"2_Sameer  (Class)"}/> */}
+               </div>
+                
+                
+                </div>
+            </div>
+        );
+    }
+}
+
+export default About;
+
+// Child Parent Relations Component Life Cycle Works:
+/*
+ Parent Constructor Called -> Parent Render Called 
+ -> Child Constructor Called -> Child Render Called 
+ -> Child componentDidMount Called -> Parent componentDidMount Called
+*/
