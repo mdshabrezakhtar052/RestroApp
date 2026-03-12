@@ -15,17 +15,27 @@ const RestroCard = (props) => {
      const {rating, delivery} = props;
  
      return (
-         <div className="res-card" style={styleCard}>
+         <div className="res-card m-4 w-64 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer" style={styleCard}>
              <img 
-             className="res-img"
+             className="res-img w-full h-40 object-cover"
              alt="res-img"
              src={CDN_URL + resData.info.cloudinaryImageId} />
  
              {/* Using API */}
-             <h3>{name}</h3>
-             <h5>{cuisines.join(", ")}</h5>
-             <h5>rating: {avgRating}</h5>
-             <h5>Price: {costForTwo}</h5> 
+             <div className="p-3">
+             <h3 className="font-bold text-lg truncate">{name}</h3>
+             <p className="text-gray-600 text-sm truncate">{cuisines.join(", ")}</p>
+             <div className="flex justify-between items-center mt-2">
+                <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">
+                ⭐️ {avgRating}
+                </span>
+                <span className="text-gray-700 text-sm font-medium">
+                {costForTwo}
+                </span>
+             </div>
+        
+             </div>
+            
          </div>
      );
  };

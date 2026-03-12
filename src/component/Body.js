@@ -48,10 +48,10 @@ const Body = () => {
 
     // Normal JS Variable 
     // let listOfRestro = [];
-    
+
     if(onlineStatus === false)
         return(
-     <h1>Looks like you're offline! Please check your internet connection</h1>
+     <h1 className="text-center text-xl font-semibold mt-10">Looks like you're offline! Please check your internet connection</h1>
      )
 
     // Loading when API is loaded
@@ -60,14 +60,14 @@ const Body = () => {
     }
 
     return (
-        <div className="body">
-            <div className="Interract">
-            <div className="search">
-                <input type="text" className="search-box"
+        <div className="body px-10 py-6">
+            <div className="Interract flex justify-between items-center mb-6">
+            <div className="search flex items-center gap-3">
+                <input type="text" className="search-box x-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                 value={searchText} onChange={(e) => {
                     setSearchText(e.target.value);
                 }}></input>
-                <button className="search-btn"
+                <button className="search-btn px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition cursor-pointer"
                 onClick={() => {
                     // Filter the restro cards and update the UI
                     // searchText
@@ -77,7 +77,7 @@ const Body = () => {
                 }}>Search</button>
             </div>
             <div className="filter">
-                <button className="filter-btn" onClick={() => {
+                <button className="filter-btn px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition cursor-pointer" onClick={() => {
                     const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
                     setFilteredRestro(filteredRestro);
                     console.log(filteredRestro);
@@ -89,7 +89,7 @@ const Body = () => {
                 listOfRestro.length === 0 ? (
                     <Shimmer />
                 ) : (
-                    <div className="res-container">
+                    <div className="res-container flex flex-wrap justify-center">
                     {
                         filteredRestro.map((restaurant) => (
                            <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}><RestroCard resData = {restaurant} /></Link> 
