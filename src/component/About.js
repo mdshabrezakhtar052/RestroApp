@@ -1,6 +1,7 @@
 import React from "react";
 // import User from "./User";
 import UserClass from "./UserClass";
+import UserContext from "../Utils/UserContext";
 
 // import { Component } from "react"; - We can write {class About extends Component}instead of React.Component
 
@@ -45,6 +46,23 @@ class About extends React.Component {
                <UserClass name={"1_Shabrez (Class)"}/>
                {/* <UserClass name={"2_Sameer  (Class)"}/> */}
                </div>
+               {/* 
+               Consume inside class based components - 2nd way to consume Context data - Demo
+               Step 4: Class Component Consumption
+               ⚠️ Important:
+               👉 Functional → useContext()
+               👉 Class → Consumer
+               */}
+               <div>LoggedIn User : 
+                <UserContext.Consumer>
+                {/* {(data) => console.log(data)} */}
+                {
+                    ({loggedInUser}) => (
+                        <h1 className="text-xl font-extralight">{loggedInUser}</h1>
+                    )
+                }
+                </UserContext.Consumer>
+                </div>
                 
                 
                 </div>

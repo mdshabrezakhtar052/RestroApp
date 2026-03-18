@@ -1,4 +1,4 @@
-import React, {lazy, Suspense} from "react";
+import React, {lazy, Suspense, useEffect, useState} from "react";
 import ReactDOM from "react-dom/client";
 import Header from "./component/Header";
 import Body from "./component/Body";
@@ -8,6 +8,9 @@ import Error from "./component/Error";
 import { createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
 import Career from "./component/Career";
 import RestroMenu from "./component/RestroMenu";
+
+// Context Demo
+import UserContext from "./Utils/UserContext";
 // import Grocery from "./component/Grocery";
 
 //  Dynamic Bundling
@@ -20,14 +23,53 @@ import RestroMenu from "./component/RestroMenu";
 const Grocery = lazy(() => import("./component/Grocery"));
 
 // Main App Component
+// const AppLayout  = () => {
+//     return (
+//         <div className = "app">
+//             <Header />
+//             <Outlet />
+//         </div>
+//     );
+// };
+
+// Apply Context Provider for all app level: Context Demo
 const AppLayout  = () => {
+
+    // Single Source of Truth
+    const [userName, setUserName] = useState("");
+
+    // Context API - Demo
+    useEffect (() => {
+        const data = {
+            name:"Md Shabrez",
+        };
+        setUserName(data.name);
+    }, []);
+
     return (
-        <div className = "app">
-            <Header />
-            <Outlet />
-        </div>
+        // I can wrap whole app and context LoggedInUser is access everywhere or any specific portion like header only also.
+        // Context is global space.
+        // Provide Context (App Level) - “Hey React, make this data available to ALL components inside this tree”
+        // Shared Everywhere via Context
+        <UserContext.Provider value={{loggedInUser: userName, setUserName}}>
+            <div className = "app">
+                <Header />
+                <Outlet />
+            </div>
+        </UserContext.Provider>
+
+        // <UserContext.Provider value={{loggedInUser: userName, setUserName}}>
+        //     <div className = "app">
+        //         <UserContext.Provider value={{loggedInUser: "Akhtar,Shabrez"}}>
+        //             <Header />
+        //         </UserContext.Provider>
+        //         <Outlet />
+        //     </div>
+        // </UserContext.Provider>
+        
     );
 };
+
 
 const appRouter = createBrowserRouter(
     [

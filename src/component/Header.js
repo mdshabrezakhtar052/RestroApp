@@ -1,7 +1,8 @@
 import { LOGO_URL } from "../Utils/constants";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext} from "react";
 import { Link } from "react-router-dom";
 import useOnlineStatus from "../Utils/useOnlineStatus";
+import UserContext from "../Utils/UserContext";
 
 // Header Component
 const Header = () => {
@@ -20,6 +21,11 @@ const Header = () => {
     useEffect(() => {
         // console.log("useEffect called");
     }, [btnNameReact]);
+
+    // const userLoginData = useContext(UserContext);
+    // Step 2: Consume Context (Functional Component)
+    const {loggedInUser} = useContext(UserContext);
+    // console.log(userLoginData);
 
     return (
         <div className="header flex justify-between items-center px-8 py-3 bg-white shadow-md sticky top-0 z-50">
@@ -56,7 +62,11 @@ const Header = () => {
                         btnNameReact === "Login" ? setbtnNameReact("Logout") : setbtnNameReact("Login"); 
                         // console.log(setbtnNameReact);
                     }}>{btnNameReact}</button>
+                    <li className="px-2 font-light">
+                        🧑‍💻 {loggedInUser}
+                    </li>
                 </ul>
+
             </div>
         </div>
     );

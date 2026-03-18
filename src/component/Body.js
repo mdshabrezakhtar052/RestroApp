@@ -1,22 +1,28 @@
-import RestroCard from "./RestroCard";
+import RestroCard, {withVegLabel} from "./RestroCard";
 // import restroList from "../Utils/mockData";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext} from "react";
 import Shimmer from "./Shimmer";
 import { Link } from "react-router-dom";
 import useOnlineStatus from "../Utils/useOnlineStatus";
+import UserContext from "../Utils/UserContext";
 
 const Body = () => {
 
     // Local State Variable - super powerful variable
-    //    const [listOfRestro, setListOfRestro] = useState(restroList);
+    // const [listOfRestro, setListOfRestro] = useState(restroList);
     
        const [listOfRestro, setListOfRestro] = useState([]);
        const [filteredRestro, setFilteredRestro] = useState([]);
 
        const [searchText, setSearchText] = useState("");
+
        const onlineStatus = useOnlineStatus();
+
+       const RestroCardVeg = withVegLabel(RestroCard);
+
        // Whenever state variables update, react triggers a reconciliation cycle(re-renders the component)
-       console.log("Body Rendered");
+       console.log("Body Rendered" , listOfRestro);
+
        useEffect(() => {
         fetchData();
        },[]);
@@ -49,11 +55,15 @@ const Body = () => {
     // Normal JS Variable 
     // let listOfRestro = [];
 
+      // Context - Demo
+      // Step 3: Consume Context (Another Component)
+      const {loggedInUser,setUserName} = useContext(UserContext);
+
     if(onlineStatus === false)
         return(
      <h1 className="text-center text-xl font-semibold mt-10">Looks like you're offline! Please check your internet connection</h1>
      )
-
+     
     // Loading when API is loaded
     if(listOfRestro.length === 0) {
         return <Shimmer />;
@@ -72,10 +82,39 @@ const Body = () => {
                     // Filter the restro cards and update the UI
                     // searchText
                     console.log(searchText);
-                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+
+                    const trimmedText = searchText.trim();
+                    console.log(trimmedText);
+                    
+                    if(trimmedText === ""){
+                        setFilteredRestro(listOfRestro);
+                        return;
+                    }
+
+                    const filteredRestro = listOfRestro.filter((res) => res.info.name.toLowerCase().includes(trimmedText.toLowerCase()));
                     setFilteredRestro(filteredRestro);
                 }}>Search</button>
             </div>
+
+
+            {/* Just to update the context data - demo */}
+           
+            {/*
+            👉 You are doing 2 things:
+            1. ✅ Reading data:
+            value={loggedInUser}
+            2. ✅ Updating data:
+            onChange={(e) => setUserName(e.target.value)}
+            */}
+            
+            <div className="flex items-center gap-3">
+                <label>User Name:</label>
+                <input className="border border-black p-2 rounded-md" 
+                value={loggedInUser}
+                onChange={(e) => setUserName(e.target.value)}/>
+            </div>
+
+
             <div className="filter">
                 <button className="filter-btn px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition cursor-pointer" onClick={() => {
                     const filteredRestro = listOfRestro.filter((res) => res.info.avgRating > 4.2);
@@ -89,10 +128,22 @@ const Body = () => {
                 listOfRestro.length === 0 ? (
                     <Shimmer />
                 ) : (
-                    <div className="res-container flex flex-wrap justify-center">
+                    <div className="res-container px-8 py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {
                         filteredRestro.map((restaurant) => (
-                           <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}><RestroCard resData = {restaurant} /></Link> 
+                           <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}>
+
+                            {/* If the restaurant is promoted then add a promoted label to it. */}
+
+                            {
+                                restaurant.info.veg ? (
+                                    < RestroCardVeg resData={restaurant} />
+                                ) : (
+                                    <RestroCard resData={restaurant}  />
+                                )
+                            }
+                                 {/* <RestroCard resData = {restaurant} /> */}
+                           </Link> 
                         ))
                     }
                 </div>

@@ -13,6 +13,8 @@ const useRestroMenu = (resid) => {
     const fetchData = async () => {
         const data = await fetch(MENU_API + resid);
         const json  = await data.json();
+
+        console.log(json.data);
         setResInfo(json.data);
     };
 

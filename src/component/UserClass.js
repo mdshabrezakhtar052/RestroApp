@@ -53,16 +53,16 @@ class UserClass extends React.Component {
         return (
             <div className="user-card">
 
-            <img src={avatar_url}/>
+            <img src={avatar_url} alt="Profile Image"/>
                 
             {/* <h4>Count : {count}</h4> */}
-            <button onClick={() => {
+            {/* <button onClick={() => {
                 // NEVER UPDATE STATE VARIABLE DIRECTLY
                 this.setState({
                     // count: this.state.count + 1,
                     // count2: this.state.count2 + 1,
                 })
-            }}>Count++</button>
+            }}>Count++</button> */}
             {/* <h4>Emp Num: {count1}</h4> */}
             {/* Below is update component with the updated data */}
             <h4>Name: {name}</h4>
