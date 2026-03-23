@@ -8,9 +8,12 @@ import Error from "./component/Error";
 import { createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
 import Career from "./component/Career";
 import RestroMenu from "./component/RestroMenu";
+import { Provider } from "react-redux";
 
 // Context Demo
 import UserContext from "./Utils/UserContext";
+import appStore from "./Utils/appStore";
+import Cart from "./component/Cart";
 // import Grocery from "./component/Grocery";
 
 //  Dynamic Bundling
@@ -51,12 +54,16 @@ const AppLayout  = () => {
         // Context is global space.
         // Provide Context (App Level) - “Hey React, make this data available to ALL components inside this tree”
         // Shared Everywhere via Context
+
+        // Here we are provided store to the app.
+        <Provider store={appStore}>
         <UserContext.Provider value={{loggedInUser: userName, setUserName}}>
             <div className = "app">
                 <Header />
                 <Outlet />
             </div>
         </UserContext.Provider>
+       </Provider>
 
         // <UserContext.Provider value={{loggedInUser: userName, setUserName}}>
         //     <div className = "app">
@@ -125,6 +132,10 @@ const appRouter = createBrowserRouter(
              {
                 path: "/restaurants/:resid",
                 element: <RestroMenu />,
+             },
+             {
+                path: "/cart",
+                element: <Cart />
              },
         ],
         errorElement: <Error />,

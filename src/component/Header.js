@@ -3,6 +3,7 @@ import { useEffect, useState, useContext} from "react";
 import { Link } from "react-router-dom";
 import useOnlineStatus from "../Utils/useOnlineStatus";
 import UserContext from "../Utils/UserContext";
+import { useSelector } from "react-redux";
 
 // Header Component
 const Header = () => {
@@ -26,6 +27,10 @@ const Header = () => {
     // Step 2: Consume Context (Functional Component)
     const {loggedInUser} = useContext(UserContext);
     // console.log(userLoginData);
+
+    // Subscribing to the store using a selector
+    const cartItems = useSelector((store) => store.cart.items);
+    console.log(cartItems);
 
     return (
         <div className="header flex justify-between items-center px-8 py-3 bg-white shadow-md sticky top-0 z-50">
@@ -52,8 +57,25 @@ const Header = () => {
                     <li className="hover:text-orange-500 transition">
                      <Link to="/grocery">Grocery</Link>   
                     </li>
+                    {/* <li className="hover:text-orange-500 transition font-bold">
+                     <Link to="/cart">
+                     {cartItems.length}🛒
+                     </Link>   
+                    </li> */}
+                    <li className="hover:text-orange-500 transition font-bold">
+                        <Link to="/cart" className="relative inline-block">
+                        {/* Cart Icon */}
+                        <span className="text-2xl">🛒</span>
+                        {/* Badge */}
+                        {cartItems.length > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                {cartItems.length}
+                            </span>
+                        )}
+                        </Link>
+                    </li>
         {/* Login Button */}
-                    <button className= {`px-4 py-2 text-white rounded-lg font-medium transition shadow
+            <button className= {`px-4 py-2 text-white rounded-lg font-medium transition shadow
             ${
               btnNameReact === "Login"
                 ? "bg-green-500 hover:bg-green-600"

@@ -106,13 +106,13 @@ const Body = () => {
             2. ✅ Updating data:
             onChange={(e) => setUserName(e.target.value)}
             */}
-            
-            <div className="flex items-center gap-3">
+
+            {/* <div className="flex items-center gap-3">
                 <label>User Name:</label>
                 <input className="border border-black p-2 rounded-md" 
                 value={loggedInUser}
                 onChange={(e) => setUserName(e.target.value)}/>
-            </div>
+            </div> */}
 
 
             <div className="filter">
