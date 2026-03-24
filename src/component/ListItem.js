@@ -1,21 +1,3 @@
-{/* ADD BUTTON */}
-<button className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white text-green-600 font-bold px-6 py-1 rounded-md shadow-md border cursor-pointer hover:bg-gray-200 "
- // What will be the difference between in all three of them
- onClick={() => handleAddItem(item)}
- onClick={handleAddItem}
- onClick={handleAddItem(item)}
- >
- ADD
-</button>
-
-// Read about immer 
-// Redux Toolkit - Read about RTK Query
-// Read about Redux in details.
-// React Dev Tools
-
-
-/*
-
 // import { CDN_URL } from "../Utils/constants";
 
 // const ItemList = ({items}) => {
@@ -47,7 +29,7 @@ import { CDN_URL } from "../Utils/constants";
 import { useDispatch } from "react-redux";
 import { addItem } from "../Utils/cartSlice";
 
-const ItemList = ({ items }) => {
+const ListItem = ({ items }) => {
 
     const dispatch = useDispatch();
 
@@ -106,6 +88,4 @@ const ItemList = ({ items }) => {
     );
 };
 
-export default ItemList;
-
-*/
+export default ListItem;

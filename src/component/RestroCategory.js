@@ -1,5 +1,5 @@
 // import { useState } from "react";
-import ItemList from "./ItemList";
+import ListItem from "./ListItem";
 
 const RestroCategory = ({categoryData, showItems, setShowIndex}) => {
 
@@ -31,7 +31,7 @@ const RestroCategory = ({categoryData, showItems, setShowIndex}) => {
             {/* Accordion Body */}
             {/* <ItemList items={categoryData?.itemCards} /> */}
 
-            {showItems && <ItemList items={categoryData?.itemCards}/>}
+            {showItems && <ListItem items={categoryData?.itemCards}/>}
         </div>   
     </div>
     );
